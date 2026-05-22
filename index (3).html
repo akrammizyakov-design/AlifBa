@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>AlifBa — Арабский алфавит</title>
+
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#1e7a1e"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="AlifBa"/>
+  <meta name="description" content="Изучайте арабский алфавит — буквы и транскрипция"/>
+  <link rel="apple-touch-icon" href="/icon.svg"/>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1e7a1e;
+      --green-dark: #155015;
+      --green-border: rgba(34,120,34,0.22);
+      --green-light: rgba(34,120,34,0.07);
+      --text: #1a3a1a;
+      --text-muted: rgba(30,80,30,0.52);
+      --bg: #f0f7f0;
+      --white: #ffffff;
+    }
+
+    html, body { height: 100%; overscroll-behavior: none; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Crimson Pro', Georgia, serif;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    .app {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #fff 0%, #e8f5e8 50%, #d4edd4 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .app::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(circle at 10% 5%, rgba(34,120,34,0.07) 0%, transparent 45%),
+        radial-gradient(circle at 90% 95%, rgba(20,100,20,0.06) 0%, transparent 45%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .ornament {
+      position: fixed;
+      font-size: 18rem;
+      color: rgba(34,120,34,0.035);
+      pointer-events: none; z-index: 0;
+      line-height: 1; user-select: none; direction: rtl;
+    }
+    .ornament.tl { top: -3rem; left: -2rem; }
+    .ornament.br { bottom: -3rem; right: -2rem; transform: rotate(180deg); }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 640px; margin: 0 auto;
+      padding: 0 1rem 6rem;
+    }
+
+    /* ── SPLASH ── */
+    #splash {
+      position: fixed; inset: 0;
+      background: var(--green);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 999;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    #splash.hide { opacity: 0; transform: scale(1.06); pointer-events: none; }
+    .splash-icon {
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.13);
+      border-radius: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.8rem; direction: rtl;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .splash-title {
+      font-family: 'Cinzel', serif;
+      font-size: 2.2rem; font-weight: 700;
+      color: white; letter-spacing: 0.1em;
+    }
+    .splash-sub {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.65);
+      font-style: italic; margin-top: 0.4rem;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      padding: 2.5rem 0 1.8rem;
+      border-bottom: 1px solid var(--green-border);
+      margin-bottom: 1.8rem;
+    }
+    .header-icon {
+      width: 68px; height: 68px;
+      background: var(--green);
+      border-radius: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 2rem; direction: rtl;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 4px 18px rgba(34,120,34,0.28);
+    }
+    .header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.7rem; font-weight: 700;
+      color: var(--green); letter-spacing: 0.12em;
+    }
+    .header p {
+      font-size: 1rem; color: var(--text-muted);
+      font-style: italic; margin-top: 0.3rem;
+    }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem; letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(34,120,34,0.5);
+      text-align: center; margin-bottom: 1.2rem;
+    }
+
+    /* ── ALPHABET GRID ── */
+    .alphabet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+      gap: 0.6rem;
+    }
+    .letter-card {
+      aspect-ratio: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 1px solid var(--green-border);
+      background: var(--white);
+      box-shadow: 0 2px 6px rgba(34,120,34,0.07);
+      border-radius: 12px;
+      cursor: pointer; gap: 0.25rem;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .letter-card:active { transform: scale(0.94); background: rgba(34,120,34,0.06); }
+    .letter-card .arabic-char { font-size: 2rem; color: var(--green); line-height: 1; direction: rtl; }
+    .letter-card .latin-name { font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.04em; font-family: 'Cinzel', serif; }
+
+    /* ── MODAL (bottom sheet) ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,40,10,0.6);
+      z-index: 200;
+      display: flex; align-items: flex-end; justify-content: center;
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+    .modal {
+      background: var(--white);
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 640px;
+      padding: 1.5rem 2rem 3rem;
+      text-align: center;
+      animation: slideUp 0.3s ease;
+      max-height: 92vh; overflow-y: auto;
+    }
+    @keyframes slideUp { from { transform: translateY(60px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+    .modal-handle { width: 40px; height: 4px; background: rgba(34,120,34,0.18); border-radius: 2px; margin: 0 auto 1.5rem; }
+    .modal-arabic { font-size: 6rem; color: var(--green); line-height: 1.1; direction: rtl; text-shadow: 0 0 40px rgba(34,120,34,0.18); margin-bottom: 0.4rem; }
+    .modal-name { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--text); letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+    .modal-transcription { font-size: 1.4rem; color: var(--green); font-style: italic; font-weight: 300; margin-bottom: 0.15rem; }
+    .modal-sound { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); font-family: 'Cinzel', serif; margin-bottom: 1.2rem; }
+    .modal-divider { width: 36px; height: 1px; background: var(--green-border); margin: 0 auto 1.2rem; }
+    .modal-description { font-size: 1rem; color: rgba(26,58,26,0.7); line-height: 1.7; font-weight: 300; margin-bottom: 1.4rem; }
+    .modal-forms { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.4rem; margin-bottom: 1.8rem; }
+    .form-cell { border: 1px solid var(--green-border); background: rgba(34,120,34,0.03); padding: 0.5rem 0.2rem; border-radius: 8px; }
+    .form-arabic { font-size: 1.3rem; color: #2a8a2a; direction: rtl; line-height: 1; }
+    .form-label { font-size: 0.5rem; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Cinzel', serif; margin-top: 0.25rem; }
+    .modal-close {
+      background: var(--green); border: none; color: white;
+      font-family: 'Cinzel', serif; font-size: 0.75rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.8rem 2rem; border-radius: 10px;
+      cursor: pointer; width: 100%;
+      box-shadow: 0 3px 12px rgba(34,120,34,0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── QUIZ ── */
+    .quiz-wrap { max-width: 500px; margin: 0 auto; }
+    .quiz-progress-bar { height: 4px; background: rgba(34,120,34,0.12); border-radius: 2px; margin-bottom: 0.5rem; }
+    .quiz-progress-fill { height: 100%; background: linear-gradient(90deg, rgba(34,120,34,0.4), var(--green)); border-radius: 2px; transition: width 0.5s ease; }
+    .quiz-progress-row { display: flex; justify-content: space-between; margin-bottom: 1.8rem; }
+    .quiz-progress-label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-muted); }
+    .quiz-progress-label.green { color: var(--green); font-weight: 600; }
+
+    .quiz-letter-display {
+      text-align: center; margin-bottom: 2rem;
+      background: var(--white); border-radius: 20px;
+      padding: 2rem 1rem;
+      box-shadow: 0 4px 20px rgba(34,120,34,0.08);
+      border: 1px solid var(--green-border);
+    }
+    .quiz-big-arabic { font-size: 8rem; color: var(--green); direction: rtl; line-height: 1; text-shadow: 0 0 40px rgba(34,120,34,0.15); }
+    .quiz-hint { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(30,80,30,0.3); font-family: 'Cinzel', serif; margin-top: 0.5rem; }
+
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+    .quiz-option {
+      padding: 1rem 0.8rem;
+      border: 1.5px solid var(--green-border);
+      background: var(--white);
+      box-shadow: 0 2px 8px rgba(34,120,34,0.06);
+      color: var(--text); cursor: pointer;
+      text-align: center; border-radius: 12px;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quiz-option:active:not(:disabled) { transform: scale(0.96); }
+    .opt-transcription { font-size: 1.3rem; color: var(--green); font-style: italic; display: block; font-weight: 300; margin-bottom: 0.1rem; }
+    .opt-name { font-size: 0.6rem; font-family: 'Cinzel', serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+
+    .quiz-option.correct { border-color: #1a9a1a; background: rgba(30,150,30,0.1); box-shadow: 0 0 0 2px rgba(30,150,30,0.2); animation: pulse-green 0.35s ease; }
+    .quiz-option.correct .opt-transcription, .quiz-option.correct .opt-name { color: #1a7a1a; }
+    .quiz-option.wrong { border-color: rgba(200,60,60,0.7); background: rgba(200,60,60,0.08); animation: shake 0.35s ease; }
+    .quiz-option.wrong .opt-transcription, .quiz-option.wrong .opt-name { color: #b03030; }
+    .quiz-option.dimmed { opacity: 0.28; }
+
+    @keyframes pulse-green { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+    .quiz-feedback { text-align: center; margin-top: 1.2rem; min-height: 2rem; font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    .quiz-feedback.ok { color: #1a7a1a; }
+    .quiz-feedback.err { color: #b03030; }
+
+    .quiz-next-btn {
+      display: block; margin: 1.2rem auto 0;
+      padding: 0.8rem 2.5rem;
+      background: var(--green); border: none; color: white;
+      font-family: 'Cinzel', serif; font-size: 0.75rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; border-radius: 10px;
+      box-shadow: 0 3px 12px rgba(34,120,34,0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── RESULT ── */
+    .result-wrap { text-align: center; padding: 2rem 0; }
+    .result-icon { width: 90px; height: 90px; background: var(--green); border-radius: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 2.8rem; direction: rtl; margin-bottom: 1.2rem; box-shadow: 0 6px 24px rgba(34,120,34,0.3); }
+    .result-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--green); letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .result-score { font-size: 4rem; font-weight: 300; color: var(--text); line-height: 1; }
+    .result-score span { font-size: 1.2rem; color: var(--text-muted); }
+    .result-msg { font-size: 1rem; color: var(--text-muted); font-style: italic; margin: 0.8rem 0 2rem; }
+    .result-restart { padding: 0.8rem 2.5rem; background: var(--green); border: none; color: white; font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 10px; box-shadow: 0 3px 14px rgba(34,120,34,0.3); -webkit-tap-highlight-color: transparent; }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--green-border);
+      display: flex; z-index: 50;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bottom-nav-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0.7rem 0; border: none; background: transparent;
+      cursor: pointer; gap: 0.2rem;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.2s;
+    }
+    .bottom-nav-icon { font-size: 1.4rem; direction: rtl; line-height: 1; }
+    .bottom-nav-label { font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .bottom-nav-btn.active .bottom-nav-label { color: var(--green); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-icon">أب</div>
+  <div class="splash-title">AlifBa</div>
+  <div class="splash-sub">Арабский алфавит</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" style="display:none">
+  <div class="ornament tl">ب</div>
+  <div class="ornament br">ع</div>
+  <div class="container">
+    <header class="header">
+      <div class="header-icon">أب</div>
+      <h1>AlifBa</h1>
+      <p>Изучайте арабский алфавит</p>
+    </header>
+    <div id="view-alphabet"></div>
+    <div id="view-quiz" style="display:none"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="bottom-nav-btn active" id="nav-alphabet" onclick="showView('alphabet')">
+      <span class="bottom-nav-icon">أ</span>
+      <span class="bottom-nav-label">Алфавит</span>
+    </button>
+    <button class="bottom-nav-btn" id="nav-quiz" onclick="startQuiz()">
+      <span class="bottom-nav-icon">✦</span>
+      <span class="bottom-nav-label">Тест</span>
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" style="display:none" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-arabic" id="m-arabic"></div>
+    <div class="modal-name" id="m-name"></div>
+    <div class="modal-transcription" id="m-trans"></div>
+    <div class="modal-sound" id="m-sound"></div>
+    <div class="modal-divider"></div>
+    <div class="modal-description" id="m-desc"></div>
+    <div class="modal-forms" id="m-forms"></div>
+    <button class="modal-close" onclick="closeModal()">Закрыть</button>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const alphabet = [
+  {id:1,  arabic:"ا", name:"Алиф",  transcription:"ā / a",  sound:"А",            forms:{isolated:"ا",  initial:"ا",  medial:"ـا",  final:"ـا"},  description:"Первая буква арабского алфавита. Долгий звук «а»."},
+  {id:2,  arabic:"ب", name:"Ба",    transcription:"b",      sound:"Б",            forms:{isolated:"ب",  initial:"بـ", medial:"ـبـ", final:"ـب"},  description:"Произносится как русский «б»."},
+  {id:3,  arabic:"ت", name:"Та",    transcription:"t",      sound:"Т",            forms:{isolated:"ت",  initial:"تـ", medial:"ـتـ", final:"ـت"},  description:"Произносится как русский «т»."},
+  {id:4,  arabic:"ث", name:"Са",    transcription:"ṯ / th", sound:"С (межзуб.)",  forms:{isolated:"ث",  initial:"ثـ", medial:"ـثـ", final:"ـث"},  description:"Межзубный звук, как английский «th» в слове think."},
+  {id:5,  arabic:"ج", name:"Джим",  transcription:"ǧ / j",  sound:"Дж",           forms:{isolated:"ج",  initial:"جـ", medial:"ـجـ", final:"ـج"},  description:"Произносится как «дж» или «ж» в зависимости от диалекта."},
+  {id:6,  arabic:"ح", name:"Ха",    transcription:"ḥ",      sound:"Х (глубокий)", forms:{isolated:"ح",  initial:"حـ", medial:"ـحـ", final:"ـح"},  description:"Глубокий глоточный звук «х», без голоса."},
+  {id:7,  arabic:"خ", name:"Ха",    transcription:"ḫ / kh", sound:"Х (веляр.)",   forms:{isolated:"خ",  initial:"خـ", medial:"ـخـ", final:"ـخ"},  description:"Как русский «х» в слове «хорошо», но глубже."},
+  {id:8,  arabic:"د", name:"Даль",  transcription:"d",      sound:"Д",            forms:{isolated:"د",  initial:"د",  medial:"ـد",  final:"ـد"},  description:"Произносится как русский «д»."},
+  {id:9,  arabic:"ذ", name:"Заль",  transcription:"ḏ / dh", sound:"З (межзуб.)",  forms:{isolated:"ذ",  initial:"ذ",  medial:"ـذ",  final:"ـذ"},  description:"Межзубный звук, как английский «th» в слове the."},
+  {id:10, arabic:"ر", name:"Ра",    transcription:"r",      sound:"Р",            forms:{isolated:"ر",  initial:"ر",  medial:"ـر",  final:"ـر"},  description:"Рокочущий «р», сильнее чем русский."},
+  {id:11, arabic:"ز", name:"Зайн",  transcription:"z",      sound:"З",            forms:{isolated:"ز",  initial:"ز",  medial:"ـز",  final:"ـز"},  description:"Произносится как русский «з»."},
+  {id:12, arabic:"س", name:"Сийн",  transcription:"s",      sound:"С",            forms:{isolated:"س",  initial:"سـ", medial:"ـسـ", final:"ـس"},  description:"Произносится как русский «с»."},
+  {id:13, arabic:"ش", name:"Шийн",  transcription:"š / sh", sound:"Ш",            forms:{isolated:"ش",  initial:"شـ", medial:"ـشـ", final:"ـش"},  description:"Произносится как русский «ш»."},
+  {id:14, arabic:"ص", name:"Сад",   transcription:"ṣ",      sound:"С (эмфат.)",   forms:{isolated:"ص",  initial:"صـ", medial:"ـصـ", final:"ـص"},  description:"Эмфатический «с» — произносится с напряжением горла."},
+  {id:15, arabic:"ض", name:"Дад",   transcription:"ḍ",      sound:"Д (эмфат.)",   forms:{isolated:"ض",  initial:"ضـ", medial:"ـضـ", final:"ـض"},  description:"Уникальный арабский эмфатический звук."},
+  {id:16, arabic:"ط", name:"Та",    transcription:"ṭ",      sound:"Т (эмфат.)",   forms:{isolated:"ط",  initial:"طـ", medial:"ـطـ", final:"ـط"},  description:"Эмфатический «т» — глубокий, напряжённый."},
+  {id:17, arabic:"ظ", name:"За",    transcription:"ẓ",      sound:"З (эмфат.)",   forms:{isolated:"ظ",  initial:"ظـ", medial:"ـظـ", final:"ـظ"},  description:"Эмфатический межзубный звук."},
+  {id:18, arabic:"ع", name:"Айн",   transcription:"ʿ",      sound:"Айн",          forms:{isolated:"ع",  initial:"عـ", medial:"ـعـ", final:"ـع"},  description:"Уникальный гортанный звук — сжатие горла с голосом."},
+  {id:19, arabic:"غ", name:"Гайн",  transcription:"ġ / gh", sound:"Г (увуляр.)",  forms:{isolated:"غ",  initial:"غـ", medial:"ـغـ", final:"ـغ"},  description:"Похож на французский «р» — глубокий гортанный."},
+  {id:20, arabic:"ف", name:"Фа",    transcription:"f",      sound:"Ф",            forms:{isolated:"ف",  initial:"فـ", medial:"ـفـ", final:"ـف"},  description:"Произносится как русский «ф»."},
+  {id:21, arabic:"ق", name:"Каф",   transcription:"q",      sound:"К (увуляр.)",  forms:{isolated:"ق",  initial:"قـ", medial:"ـقـ", final:"ـق"},  description:"Глубокий «к» — из самой глубины горла."},
+  {id:22, arabic:"ك", name:"Каф",   transcription:"k",      sound:"К",            forms:{isolated:"ك",  initial:"كـ", medial:"ـكـ", final:"ـك"},  description:"Произносится как русский «к»."},
+  {id:23, arabic:"ل", name:"Лям",   transcription:"l",      sound:"Л",            forms:{isolated:"ل",  initial:"لـ", medial:"ـلـ", final:"ـل"},  description:"Произносится как русский «л»."},
+  {id:24, arabic:"م", name:"Мийм",  transcription:"m",      sound:"М",            forms:{isolated:"م",  initial:"مـ", medial:"ـمـ", final:"ـم"},  description:"Произносится как русский «м»."},
+  {id:25, arabic:"ن", name:"Нун",   transcription:"n",      sound:"Н",            forms:{isolated:"ن",  initial:"نـ", medial:"ـنـ", final:"ـن"},  description:"Произносится как русский «н»."},
+  {id:26, arabic:"ه", name:"Ха",    transcription:"h",      sound:"Х (лёгкий)",   forms:{isolated:"ه",  initial:"هـ", medial:"ـهـ", final:"ـه"},  description:"Лёгкий «х», как выдох."},
+  {id:27, arabic:"و", name:"Вав",   transcription:"w / ū",  sound:"В / У",        forms:{isolated:"و",  initial:"و",  medial:"ـو",  final:"ـو"},  description:"Согласный «в» или долгий «у»."},
+  {id:28, arabic:"ي", name:"Йа",    transcription:"y / ī",  sound:"Й / И",        forms:{isolated:"ي",  initial:"يـ", medial:"ـيـ", final:"ـي"},  description:"Согласный «й» или долгий «и»."},
+];
+
+const TOTAL_Q = 10;
+let quizQuestions=[], quizIdx=0, quizScore=0, quizAnswered=false, quizDone=false;
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+function getOptions(correct){ return shuffle([correct,...shuffle(alphabet.filter(l=>l.id!==correct.id)).slice(0,3)]); }
+
+// ── SPLASH ──
+window.addEventListener('load', () => {
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hide');
+    document.getElementById('app').style.display='block';
+    renderAlphabet();
+    setTimeout(()=>document.getElementById('splash').style.display='none',700);
+  }, 1500);
+});
+
+// ── VIEWS ──
+function showView(v){
+  document.getElementById('view-alphabet').style.display = v==='alphabet'?'':'none';
+  document.getElementById('view-quiz').style.display     = v==='quiz'?'':'none';
+  document.getElementById('nav-alphabet').classList.toggle('active', v==='alphabet');
+  document.getElementById('nav-quiz').classList.toggle('active', v==='quiz');
+}
+
+// ── ALPHABET ──
+function renderAlphabet(){
+  document.getElementById('view-alphabet').innerHTML=`
+    <p class="section-label">✦ 28 букв · нажмите на любую ✦</p>
+    <div class="alphabet-grid">
+      ${alphabet.map(l=>`
+        <div class="letter-card" onclick="openModal(${l.id})">
+          <span class="arabic-char">${l.arabic}</span>
+          <span class="latin-name">${l.name}</span>
+        </div>`).join('')}
+    </div>`;
+  showView('alphabet');
+}
+
+// ── MODAL ──
+function openModal(id){
+  const l=alphabet.find(x=>x.id===id);
+  document.getElementById('m-arabic').textContent=l.arabic;
+  document.getElementById('m-name').textContent=l.name;
+  document.getElementById('m-trans').textContent=l.transcription;
+  document.getElementById('m-sound').textContent='Звук: '+l.sound;
+  document.getElementById('m-desc').textContent=l.description;
+  document.getElementById('m-forms').innerHTML=[['isolated','Изолир.'],['initial','Начало'],['medial','Середина'],['final','Конец']]
+    .map(([k,lbl])=>`<div class="form-cell"><div class="form-arabic">${l.forms[k]}</div><div class="form-label">${lbl}</div></div>`).join('');
+  document.getElementById('modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal').style.display='none';
+  document.body.style.overflow='';
+}
+
+// ── QUIZ ──
+function startQuiz(){
+  quizQuestions=shuffle(alphabet).slice(0,TOTAL_Q).map(c=>({correct:c,options:getOptions(c)}));
+  quizIdx=0; quizScore=0; quizAnswered=false; quizDone=false;
+  showView('quiz');
+  renderQuiz();
+}
+
+function renderQuiz(){
+  const el=document.getElementById('view-quiz');
+  if(quizDone){
+    const s=quizScore;
+    const msg=s>=9?"Блестяще! Вы превосходно знаете алфавит.":s>=7?"Отлично! Продолжайте практиковаться.":s>=5?"Хороший результат. Ещё немного усилий!":"Не сдавайтесь — повторите буквы и попробуйте снова.";
+    el.innerHTML=`
+      <div class="result-wrap">
+        <div class="result-icon">أب</div>
+        <div class="result-title">Тест завершён</div>
+        <div class="result-score">${s} <span>/ ${TOTAL_Q}</span></div>
+        <div class="result-msg">${msg}</div>
+        <button class="result-restart" onclick="startQuiz()">Пройти снова</button>
+      </div>`;
+    return;
+  }
+  const q=quizQuestions[quizIdx];
+  const pct=(quizIdx/TOTAL_Q)*100;
+  el.innerHTML=`
+    <div class="quiz-wrap">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+      <div class="quiz-progress-row">
+        <span class="quiz-progress-label ${quizScore>0?'green':''}">${quizScore>0?'✓ '+quizScore:''}</span>
+        <span class="quiz-progress-label">${quizIdx+1} / ${TOTAL_Q}</span>
+      </div>
+      <div class="quiz-letter-display">
+        <div class="quiz-big-arabic">${q.correct.arabic}</div>
+        <div class="quiz-hint">Какая это буква?</div>
+      </div>
+      <div class="quiz-options">
+        ${q.options.map(opt=>`
+          <button class="quiz-option" id="opt-${opt.id}" onclick="answerQuiz(${opt.id})">
+            <span class="opt-transcription">${opt.transcription}</span>
+            <span class="opt-name">${opt.name}</span>
+          </button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <div id="next-btn-wrap"></div>
+    </div>`;
+}
+
+function answerQuiz(chosenId){
+  if(quizAnswered) return;
+  quizAnswered=true;
+  const q=quizQuestions[quizIdx];
+  const correct=q.correct.id===chosenId;
+  if(correct) quizScore++;
+  q.options.forEach(opt=>{
+    const el=document.getElementById('opt-'+opt.id);
+    if(!el) return;
+    el.disabled=true;
+    if(opt.id===q.correct.id) el.classList.add('correct');
+    else if(opt.id===chosenId) el.classList.add('wrong');
+    else el.classList.add('dimmed');
+  });
+  const fb=document.getElementById('quiz-feedback');
+  fb.className='quiz-feedback '+(correct?'ok':'err');
+  fb.textContent=correct?'✓ Верно!':'✗ Неверно — правильный: '+q.correct.name+' «'+q.correct.transcription+'»';
+  document.getElementById('next-btn-wrap').innerHTML=
+    `<button class="quiz-next-btn" onclick="nextQuestion()">${quizIdx+1<TOTAL_Q?'Следующая →':'Результаты →'}</button>`;
+}
+
+function nextQuestion(){
+  quizIdx++; quizAnswered=false;
+  if(quizIdx>=TOTAL_Q) quizDone=true;
+  renderQuiz();
+}
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
