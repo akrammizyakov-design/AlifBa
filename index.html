@@ -216,7 +216,9 @@
       padding: 2rem 1rem;
       box-shadow: 0 4px 20px rgba(34,120,34,0.08);
       border: 1px solid var(--green-border);
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
+    .quiz-letter-display:active { transform: scale(0.98); }
     .quiz-big-arabic { font-size: 8rem; color: var(--green); direction: rtl; line-height: 1; text-shadow: 0 0 40px rgba(34,120,34,0.15); }
     .quiz-hint { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(30,80,30,0.3); font-family: 'Cinzel', serif; margin-top: 0.5rem; }
 
@@ -288,6 +290,24 @@
     .bottom-nav-icon { font-size: 1.4rem; direction: rtl; line-height: 1; }
     .bottom-nav-label { font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
     .bottom-nav-btn.active .bottom-nav-label { color: var(--green); font-weight: 600; }
+
+    /* ── SPEAK BUTTON ── */
+    .speak-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      margin: 0.6rem auto 0;
+      padding: 0.45rem 1.2rem;
+      background: var(--green-light);
+      border: 1px solid var(--green-border);
+      border-radius: 20px;
+      color: var(--green);
+      font-family: 'Cinzel', serif; font-size: 0.65rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .speak-btn:active { transform: scale(0.95); background: rgba(34,120,34,0.15); }
+    .modal-arabic { cursor: pointer; }
+    .modal-arabic:active { opacity: 0.75; }
   </style>
 </head>
 <body>
@@ -329,10 +349,11 @@
 <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
-    <div class="modal-arabic" id="m-arabic"></div>
+    <div class="modal-arabic" id="m-arabic" onclick="playLetterAudio(modalAudioUrl)" title="Нажмите для произношения"></div>
     <div class="modal-name" id="m-name"></div>
     <div class="modal-transcription" id="m-trans"></div>
     <div class="modal-sound" id="m-sound"></div>
+    <button class="speak-btn" onclick="playLetterAudio(modalAudioUrl)">🔊 Послушать</button>
     <div class="modal-divider"></div>
     <div class="modal-description" id="m-desc"></div>
     <div class="modal-forms" id="m-forms"></div>
@@ -342,35 +363,36 @@
 
 <script>
 // ── DATA ──
+const BASE = 'audio/';
 const alphabet = [
-  {id:1,  arabic:"ا", name:"Алиф",  transcription:"ā / a",  sound:"А",            forms:{isolated:"ا",  initial:"ا",  medial:"ـا",  final:"ـا"},  description:"Первая буква арабского алфавита. Долгий звук «а»."},
-  {id:2,  arabic:"ب", name:"Ба",    transcription:"b",      sound:"Б",            forms:{isolated:"ب",  initial:"بـ", medial:"ـبـ", final:"ـب"},  description:"Произносится как русский «б»."},
-  {id:3,  arabic:"ت", name:"Та",    transcription:"t",      sound:"Т",            forms:{isolated:"ت",  initial:"تـ", medial:"ـتـ", final:"ـت"},  description:"Произносится как русский «т»."},
-  {id:4,  arabic:"ث", name:"Са",    transcription:"ṯ / th", sound:"С (межзуб.)",  forms:{isolated:"ث",  initial:"ثـ", medial:"ـثـ", final:"ـث"},  description:"Межзубный звук, как английский «th» в слове think."},
-  {id:5,  arabic:"ج", name:"Джим",  transcription:"ǧ / j",  sound:"Дж",           forms:{isolated:"ج",  initial:"جـ", medial:"ـجـ", final:"ـج"},  description:"Произносится как «дж» или «ж» в зависимости от диалекта."},
-  {id:6,  arabic:"ح", name:"Ха",    transcription:"ḥ",      sound:"Х (глубокий)", forms:{isolated:"ح",  initial:"حـ", medial:"ـحـ", final:"ـح"},  description:"Глубокий глоточный звук «х», без голоса."},
-  {id:7,  arabic:"خ", name:"Ха",    transcription:"ḫ / kh", sound:"Х (веляр.)",   forms:{isolated:"خ",  initial:"خـ", medial:"ـخـ", final:"ـخ"},  description:"Как русский «х» в слове «хорошо», но глубже."},
-  {id:8,  arabic:"د", name:"Даль",  transcription:"d",      sound:"Д",            forms:{isolated:"د",  initial:"د",  medial:"ـد",  final:"ـد"},  description:"Произносится как русский «д»."},
-  {id:9,  arabic:"ذ", name:"Заль",  transcription:"ḏ / dh", sound:"З (межзуб.)",  forms:{isolated:"ذ",  initial:"ذ",  medial:"ـذ",  final:"ـذ"},  description:"Межзубный звук, как английский «th» в слове the."},
-  {id:10, arabic:"ر", name:"Ра",    transcription:"r",      sound:"Р",            forms:{isolated:"ر",  initial:"ر",  medial:"ـر",  final:"ـر"},  description:"Рокочущий «р», сильнее чем русский."},
-  {id:11, arabic:"ز", name:"Зайн",  transcription:"z",      sound:"З",            forms:{isolated:"ز",  initial:"ز",  medial:"ـز",  final:"ـز"},  description:"Произносится как русский «з»."},
-  {id:12, arabic:"س", name:"Сийн",  transcription:"s",      sound:"С",            forms:{isolated:"س",  initial:"سـ", medial:"ـسـ", final:"ـس"},  description:"Произносится как русский «с»."},
-  {id:13, arabic:"ش", name:"Шийн",  transcription:"š / sh", sound:"Ш",            forms:{isolated:"ش",  initial:"شـ", medial:"ـشـ", final:"ـش"},  description:"Произносится как русский «ш»."},
-  {id:14, arabic:"ص", name:"Сад",   transcription:"ṣ",      sound:"С (эмфат.)",   forms:{isolated:"ص",  initial:"صـ", medial:"ـصـ", final:"ـص"},  description:"Эмфатический «с» — произносится с напряжением горла."},
-  {id:15, arabic:"ض", name:"Дад",   transcription:"ḍ",      sound:"Д (эмфат.)",   forms:{isolated:"ض",  initial:"ضـ", medial:"ـضـ", final:"ـض"},  description:"Уникальный арабский эмфатический звук."},
-  {id:16, arabic:"ط", name:"Та",    transcription:"ṭ",      sound:"Т (эмфат.)",   forms:{isolated:"ط",  initial:"طـ", medial:"ـطـ", final:"ـط"},  description:"Эмфатический «т» — глубокий, напряжённый."},
-  {id:17, arabic:"ظ", name:"За",    transcription:"ẓ",      sound:"З (эмфат.)",   forms:{isolated:"ظ",  initial:"ظـ", medial:"ـظـ", final:"ـظ"},  description:"Эмфатический межзубный звук."},
-  {id:18, arabic:"ع", name:"Айн",   transcription:"ʿ",      sound:"Айн",          forms:{isolated:"ع",  initial:"عـ", medial:"ـعـ", final:"ـع"},  description:"Уникальный гортанный звук — сжатие горла с голосом."},
-  {id:19, arabic:"غ", name:"Гайн",  transcription:"ġ / gh", sound:"Г (увуляр.)",  forms:{isolated:"غ",  initial:"غـ", medial:"ـغـ", final:"ـغ"},  description:"Похож на французский «р» — глубокий гортанный."},
-  {id:20, arabic:"ف", name:"Фа",    transcription:"f",      sound:"Ф",            forms:{isolated:"ف",  initial:"فـ", medial:"ـفـ", final:"ـف"},  description:"Произносится как русский «ф»."},
-  {id:21, arabic:"ق", name:"Каф",   transcription:"q",      sound:"К (увуляр.)",  forms:{isolated:"ق",  initial:"قـ", medial:"ـقـ", final:"ـق"},  description:"Глубокий «к» — из самой глубины горла."},
-  {id:22, arabic:"ك", name:"Каф",   transcription:"k",      sound:"К",            forms:{isolated:"ك",  initial:"كـ", medial:"ـكـ", final:"ـك"},  description:"Произносится как русский «к»."},
-  {id:23, arabic:"ل", name:"Лям",   transcription:"l",      sound:"Л",            forms:{isolated:"ل",  initial:"لـ", medial:"ـلـ", final:"ـل"},  description:"Произносится как русский «л»."},
-  {id:24, arabic:"م", name:"Мийм",  transcription:"m",      sound:"М",            forms:{isolated:"م",  initial:"مـ", medial:"ـمـ", final:"ـم"},  description:"Произносится как русский «м»."},
-  {id:25, arabic:"ن", name:"Нун",   transcription:"n",      sound:"Н",            forms:{isolated:"ن",  initial:"نـ", medial:"ـنـ", final:"ـن"},  description:"Произносится как русский «н»."},
-  {id:26, arabic:"ه", name:"Ха",    transcription:"h",      sound:"Х (лёгкий)",   forms:{isolated:"ه",  initial:"هـ", medial:"ـهـ", final:"ـه"},  description:"Лёгкий «х», как выдох."},
-  {id:27, arabic:"و", name:"Вав",   transcription:"w / ū",  sound:"В / У",        forms:{isolated:"و",  initial:"و",  medial:"ـو",  final:"ـو"},  description:"Согласный «в» или долгий «у»."},
-  {id:28, arabic:"ي", name:"Йа",    transcription:"y / ī",  sound:"Й / И",        forms:{isolated:"ي",  initial:"يـ", medial:"ـيـ", final:"ـي"},  description:"Согласный «й» или долгий «и»."},
+  {id:1,  arabic:"ا", name:"Алиф",  transcription:"ā / a",  sound:"А",            audio:BASE+'001-alif.mp3',  forms:{isolated:"ا",  initial:"ا",  medial:"ـا",  final:"ـا"},  description:"Первая буква арабского алфавита. Долгий звук «а»."},
+  {id:2,  arabic:"ب", name:"Ба",    transcription:"b",      sound:"Б",            audio:BASE+'ba.mp3',        forms:{isolated:"ب",  initial:"بـ", medial:"ـبـ", final:"ـب"},  description:"Произносится как русский «б»."},
+  {id:3,  arabic:"ت", name:"Та",    transcription:"t",      sound:"Т",            audio:BASE+'003-taa.mp3',   forms:{isolated:"ت",  initial:"تـ", medial:"ـتـ", final:"ـت"},  description:"Произносится как русский «т»."},
+  {id:4,  arabic:"ث", name:"Са",    transcription:"ṯ / th", sound:"С (межзуб.)",  audio:BASE+'004-tha.mp3',   forms:{isolated:"ث",  initial:"ثـ", medial:"ـثـ", final:"ـث"},  description:"Межзубный звук, как английский «th» в слове think."},
+  {id:5,  arabic:"ج", name:"Джим",  transcription:"ǧ / j",  sound:"Дж",           audio:BASE+'005-jeem.mp3',  forms:{isolated:"ج",  initial:"جـ", medial:"ـجـ", final:"ـج"},  description:"Произносится как «дж» или «ж» в зависимости от диалекта."},
+  {id:6,  arabic:"ح", name:"Ха",    transcription:"ḥ",      sound:"Х (глубокий)", audio:BASE+'006-haa.mp3',   forms:{isolated:"ح",  initial:"حـ", medial:"ـحـ", final:"ـح"},  description:"Глубокий глоточный звук «х», без голоса."},
+  {id:7,  arabic:"خ", name:"Ха",    transcription:"ḫ / kh", sound:"Х (веляр.)",   audio:BASE+'007-khaa.mp3',  forms:{isolated:"خ",  initial:"خـ", medial:"ـخـ", final:"ـخ"},  description:"Как русский «х» в слове «хорошо», но глубже."},
+  {id:8,  arabic:"د", name:"Даль",  transcription:"d",      sound:"Д",            audio:BASE+'008-dal.mp3',   forms:{isolated:"د",  initial:"د",  medial:"ـد",  final:"ـد"},  description:"Произносится как русский «д»."},
+  {id:9,  arabic:"ذ", name:"Заль",  transcription:"ḏ / dh", sound:"З (межзуб.)",  audio:BASE+'009-dhal.mp3',  forms:{isolated:"ذ",  initial:"ذ",  medial:"ـذ",  final:"ـذ"},  description:"Межзубный звук, как английский «th» в слове the."},
+  {id:10, arabic:"ر", name:"Ра",    transcription:"r",      sound:"Р",            audio:BASE+'010-raa.mp3',   forms:{isolated:"ر",  initial:"ر",  medial:"ـر",  final:"ـر"},  description:"Рокочущий «р», сильнее чем русский."},
+  {id:11, arabic:"ز", name:"Зайн",  transcription:"z",      sound:"З",            audio:BASE+'011-jaa.mp3',   forms:{isolated:"ز",  initial:"ز",  medial:"ـز",  final:"ـز"},  description:"Произносится как русский «з»."},
+  {id:12, arabic:"س", name:"Сийн",  transcription:"s",      sound:"С",            audio:BASE+'012-seen.mp3',  forms:{isolated:"س",  initial:"سـ", medial:"ـسـ", final:"ـس"},  description:"Произносится как русский «с»."},
+  {id:13, arabic:"ش", name:"Шийн",  transcription:"š / sh", sound:"Ш",            audio:BASE+'013-sheen.mp3', forms:{isolated:"ش",  initial:"شـ", medial:"ـشـ", final:"ـش"},  description:"Произносится как русский «ш»."},
+  {id:14, arabic:"ص", name:"Сад",   transcription:"ṣ",      sound:"С (эмфат.)",   audio:BASE+'014-saad.mp3',  forms:{isolated:"ص",  initial:"صـ", medial:"ـصـ", final:"ـص"},  description:"Эмфатический «с» — произносится с напряжением горла."},
+  {id:15, arabic:"ض", name:"Дад",   transcription:"ḍ",      sound:"Д (эмфат.)",   audio:BASE+'015-dhaad.mp3', forms:{isolated:"ض",  initial:"ضـ", medial:"ـضـ", final:"ـض"},  description:"Уникальный арабский эмфатический звук."},
+  {id:16, arabic:"ط", name:"Та",    transcription:"ṭ",      sound:"Т (эмфат.)",   audio:BASE+'016-toa.mp3',   forms:{isolated:"ط",  initial:"طـ", medial:"ـطـ", final:"ـط"},  description:"Эмфатический «т» — глубокий, напряжённый."},
+  {id:17, arabic:"ظ", name:"За",    transcription:"ẓ",      sound:"З (эмфат.)",   audio:BASE+'017-dhaa.mp3',  forms:{isolated:"ظ",  initial:"ظـ", medial:"ـظـ", final:"ـظ"},  description:"Эмфатический межзубный звук."},
+  {id:18, arabic:"ع", name:"Айн",   transcription:"ʿ",      sound:"Айн",          audio:BASE+'018-ain.mp3',   forms:{isolated:"ع",  initial:"عـ", medial:"ـعـ", final:"ـع"},  description:"Уникальный гортанный звук — сжатие горла с голосом."},
+  {id:19, arabic:"غ", name:"Гайн",  transcription:"ġ / gh", sound:"Г (увуляр.)",  audio:BASE+'019-ghain.mp3', forms:{isolated:"غ",  initial:"غـ", medial:"ـغـ", final:"ـغ"},  description:"Похож на французский «р» — глубокий гортанный."},
+  {id:20, arabic:"ف", name:"Фа",    transcription:"f",      sound:"Ф",            audio:BASE+'020-faa.mp3',   forms:{isolated:"ف",  initial:"فـ", medial:"ـفـ", final:"ـف"},  description:"Произносится как русский «ф»."},
+  {id:21, arabic:"ق", name:"Каф",   transcription:"q",      sound:"К (увуляр.)",  audio:BASE+'021-qaaf.mp3',  forms:{isolated:"ق",  initial:"قـ", medial:"ـقـ", final:"ـق"},  description:"Глубокий «к» — из самой глубины горла."},
+  {id:22, arabic:"ك", name:"Каф",   transcription:"k",      sound:"К",            audio:BASE+'022-kaaf.mp3',  forms:{isolated:"ك",  initial:"كـ", medial:"ـكـ", final:"ـك"},  description:"Произносится как русский «к»."},
+  {id:23, arabic:"ل", name:"Лям",   transcription:"l",      sound:"Л",            audio:BASE+'023-laam.mp3',  forms:{isolated:"ل",  initial:"لـ", medial:"ـلـ", final:"ـل"},  description:"Произносится как русский «л»."},
+  {id:24, arabic:"م", name:"Мийм",  transcription:"m",      sound:"М",            audio:BASE+'024-meem.mp3',  forms:{isolated:"م",  initial:"مـ", medial:"ـمـ", final:"ـم"},  description:"Произносится как русский «м»."},
+  {id:25, arabic:"ن", name:"Нун",   transcription:"n",      sound:"Н",            audio:BASE+'025-noon.mp3',  forms:{isolated:"ن",  initial:"نـ", medial:"ـنـ", final:"ـن"},  description:"Произносится как русский «н»."},
+  {id:26, arabic:"ه", name:"Ха",    transcription:"h",      sound:"Х (лёгкий)",   audio:BASE+'027-ha.mp3',    forms:{isolated:"ه",  initial:"هـ", medial:"ـهـ", final:"ـه"},  description:"Лёгкий «х», как выдох."},
+  {id:27, arabic:"و", name:"Вав",   transcription:"w / ū",  sound:"В / У",        audio:BASE+'026-waw.mp3',   forms:{isolated:"و",  initial:"و",  medial:"ـو",  final:"ـو"},  description:"Согласный «в» или долгий «у»."},
+  {id:28, arabic:"ي", name:"Йа",    transcription:"y / ī",  sound:"Й / И",        audio:BASE+'029-yaa.mp3',   forms:{isolated:"ي",  initial:"يـ", medial:"ـيـ", final:"ـي"},  description:"Согласный «й» или долгий «и»."},
 ];
 
 const TOTAL_Q = 10;
@@ -411,9 +433,19 @@ function renderAlphabet(){
   showView('alphabet');
 }
 
+// ── AUDIO ──
+let currentAudio = null;
+function playLetterAudio(url){
+  if(currentAudio){ currentAudio.pause(); currentAudio.currentTime=0; }
+  currentAudio = new Audio(url);
+  currentAudio.play().catch(()=>{});
+}
+
 // ── MODAL ──
+let modalAudioUrl = '';
 function openModal(id){
   const l=alphabet.find(x=>x.id===id);
+  modalAudioUrl = l.audio;
   document.getElementById('m-arabic').textContent=l.arabic;
   document.getElementById('m-name').textContent=l.name;
   document.getElementById('m-trans').textContent=l.transcription;
@@ -461,9 +493,9 @@ function renderQuiz(){
         <span class="quiz-progress-label ${quizScore>0?'green':''}">${quizScore>0?'✓ '+quizScore:''}</span>
         <span class="quiz-progress-label">${quizIdx+1} / ${TOTAL_Q}</span>
       </div>
-      <div class="quiz-letter-display">
+      <div class="quiz-letter-display" onclick="playLetterAudio('${q.correct.audio}')" title="Нажмите для произношения">
         <div class="quiz-big-arabic">${q.correct.arabic}</div>
-        <div class="quiz-hint">Какая это буква?</div>
+        <div class="quiz-hint">🔊 нажмите для произношения</div>
       </div>
       <div class="quiz-options">
         ${q.options.map(opt=>`
