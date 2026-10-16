@@ -144,6 +144,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
       gap: 0.6rem;
+      direction: rtl;
     }
     .letter-card {
       aspect-ratio: 1;
@@ -202,6 +203,73 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* ── HARAKAAT ── */
+    .harakaat-intro {
+      background: var(--white);
+      border: 1px solid var(--green-border);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1.6rem;
+      box-shadow: 0 2px 8px rgba(34,120,34,0.06);
+    }
+    .harakaat-intro-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+    .harakaat-intro-text {
+      font-size: 0.95rem; color: rgba(26,58,26,0.72);
+      line-height: 1.65; font-weight: 300;
+    }
+    .harakaat-list { display: flex; flex-direction: column; gap: 1rem; }
+    .harakaat-card {
+      background: var(--white);
+      border: 1px solid var(--green-border);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      display: flex; align-items: center; gap: 1.4rem;
+      box-shadow: 0 2px 10px rgba(34,120,34,0.07);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.18s;
+    }
+    .harakaat-card:active { transform: scale(0.98); background: rgba(34,120,34,0.04); }
+    .harakaat-sign {
+      font-size: 3.2rem; color: var(--green);
+      direction: rtl; line-height: 1;
+      min-width: 64px; text-align: center;
+      flex-shrink: 0;
+    }
+    .harakaat-info { flex: 1; text-align: left; }
+    .harakaat-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text); letter-spacing: 0.06em;
+      margin-bottom: 0.2rem;
+    }
+    .harakaat-arabic-name {
+      font-size: 0.8rem; color: var(--green);
+      direction: rtl; margin-bottom: 0.3rem;
+    }
+    .harakaat-rule {
+      font-size: 0.88rem; color: rgba(26,58,26,0.65);
+      line-height: 1.5; font-weight: 300;
+    }
+    .harakaat-sound {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem; font-weight: 600;
+      color: var(--green); min-width: 36px;
+      text-align: center; flex-shrink: 0;
+    }
+
+    /* ── MODAL NAV (swipe) ── */
+    .modal-nav-hint {
+      font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(34,120,34,0.3); font-family: 'Cinzel', serif;
+      text-align: center; margin-bottom: 1rem;
+    }
+
     /* ── QUIZ ── */
     .quiz-wrap { max-width: 500px; margin: 0 auto; }
     .quiz-progress-bar { height: 4px; background: rgba(34,120,34,0.12); border-radius: 2px; margin-bottom: 0.5rem; }
@@ -216,9 +284,7 @@
       padding: 2rem 1rem;
       box-shadow: 0 4px 20px rgba(34,120,34,0.08);
       border: 1px solid var(--green-border);
-      cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
-    .quiz-letter-display:active { transform: scale(0.98); }
     .quiz-big-arabic { font-size: 8rem; color: var(--green); direction: rtl; line-height: 1; text-shadow: 0 0 40px rgba(34,120,34,0.15); }
     .quiz-hint { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(30,80,30,0.3); font-family: 'Cinzel', serif; margin-top: 0.5rem; }
 
@@ -330,6 +396,7 @@
       <p>Изучайте арабский алфавит</p>
     </header>
     <div id="view-alphabet"></div>
+    <div id="view-harakaat" style="display:none"></div>
     <div id="view-quiz" style="display:none"></div>
   </div>
 
@@ -337,6 +404,10 @@
     <button class="bottom-nav-btn active" id="nav-alphabet" onclick="showView('alphabet')">
       <span class="bottom-nav-icon">أ</span>
       <span class="bottom-nav-label">Алфавит</span>
+    </button>
+    <button class="bottom-nav-btn" id="nav-harakaat" onclick="showView('harakaat')">
+      <span class="bottom-nav-icon">بَ</span>
+      <span class="bottom-nav-label">Харакаты</span>
     </button>
     <button class="bottom-nav-btn" id="nav-quiz" onclick="startQuiz()">
       <span class="bottom-nav-icon">✦</span>
@@ -347,8 +418,9 @@
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal()">
-  <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal" id="modal-inner" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
+    <div class="modal-nav-hint">← свайп →</div>
     <div class="modal-arabic" id="m-arabic" onclick="playLetterAudio(modalAudioUrl)" title="Нажмите для произношения"></div>
     <div class="modal-name" id="m-name"></div>
     <div class="modal-transcription" id="m-trans"></div>
@@ -368,30 +440,30 @@ const alphabet = [
   {id:1,  arabic:"ا", name:"Алиф",  transcription:"ā / a",  sound:"А",            audio:BASE+'001-alif.mp3',  forms:{isolated:"ا",  initial:"ا",  medial:"ـا",  final:"ـا"},  description:"Первая буква арабского алфавита. Долгий звук «а»."},
   {id:2,  arabic:"ب", name:"Ба",    transcription:"b",      sound:"Б",            audio:BASE+'ba.mp3',        forms:{isolated:"ب",  initial:"بـ", medial:"ـبـ", final:"ـب"},  description:"Произносится как русский «б»."},
   {id:3,  arabic:"ت", name:"Та",    transcription:"t",      sound:"Т",            audio:BASE+'003-taa.mp3',   forms:{isolated:"ت",  initial:"تـ", medial:"ـتـ", final:"ـت"},  description:"Произносится как русский «т»."},
-  {id:4,  arabic:"ث", name:"Са",    transcription:"ṯ / th", sound:"С (межзуб.)",  audio:BASE+'004-tha.mp3',   forms:{isolated:"ث",  initial:"ثـ", medial:"ـثـ", final:"ـث"},  description:"Межзубный звук, как английский «th» в слове think."},
+  {id:4,  arabic:"ث", name:"Са",    transcription:"th",     sound:"th (межзуб.)", audio:BASE+'004-tha.mp3',   forms:{isolated:"ث",  initial:"ثـ", medial:"ـثـ", final:"ـث"},  description:"Межзубный звук — как английский «th» в слове think. Кончик языка между зубами."},
   {id:5,  arabic:"ج", name:"Джим",  transcription:"ǧ / j",  sound:"Дж",           audio:BASE+'005-jeem.mp3',  forms:{isolated:"ج",  initial:"جـ", medial:"ـجـ", final:"ـج"},  description:"Произносится как «дж» или «ж» в зависимости от диалекта."},
   {id:6,  arabic:"ح", name:"Ха",    transcription:"ḥ",      sound:"Х (глубокий)", audio:BASE+'006-haa.mp3',   forms:{isolated:"ح",  initial:"حـ", medial:"ـحـ", final:"ـح"},  description:"Глубокий глоточный звук «х», без голоса."},
-  {id:7,  arabic:"خ", name:"Ха",    transcription:"ḫ / kh", sound:"Х (веляр.)",   audio:BASE+'007-khaa.mp3',  forms:{isolated:"خ",  initial:"خـ", medial:"ـخـ", final:"ـخ"},  description:"Как русский «х» в слове «хорошо», но глубже."},
+  {id:7,  arabic:"خ", name:"Хо",    transcription:"kh",     sound:"Хо",           audio:BASE+'007-khaa.mp3',  forms:{isolated:"خ",  initial:"خـ", medial:"ـخـ", final:"ـخ"},  description:"Как русский «х» в слове «хорошо», но глубже."},
   {id:8,  arabic:"د", name:"Даль",  transcription:"d",      sound:"Д",            audio:BASE+'008-dal.mp3',   forms:{isolated:"د",  initial:"د",  medial:"ـد",  final:"ـد"},  description:"Произносится как русский «д»."},
-  {id:9,  arabic:"ذ", name:"Заль",  transcription:"ḏ / dh", sound:"З (межзуб.)",  audio:BASE+'009-dhal.mp3',  forms:{isolated:"ذ",  initial:"ذ",  medial:"ـذ",  final:"ـذ"},  description:"Межзубный звук, как английский «th» в слове the."},
-  {id:10, arabic:"ر", name:"Ра",    transcription:"r",      sound:"Р",            audio:BASE+'010-raa.mp3',   forms:{isolated:"ر",  initial:"ر",  medial:"ـر",  final:"ـر"},  description:"Рокочущий «р», сильнее чем русский."},
+  {id:9,  arabic:"ذ", name:"Заль",  transcription:"dh",     sound:"th (межзуб.)", audio:BASE+'009-dhal.mp3',  forms:{isolated:"ذ",  initial:"ذ",  medial:"ـذ",  final:"ـذ"},  description:"Межзубный звук — как английский «th» в слове the. Звонкая пара буквы Са."},
+  {id:10, arabic:"ر", name:"Ра",    transcription:"r",      sound:"Ро",           audio:BASE+'010-raa.mp3',   forms:{isolated:"ر",  initial:"ر",  medial:"ـر",  final:"ـر"},  description:"Раскатистый «р» — сильнее чем русский."},
   {id:11, arabic:"ز", name:"Зайн",  transcription:"z",      sound:"З",            audio:BASE+'011-jaa.mp3',   forms:{isolated:"ز",  initial:"ز",  medial:"ـز",  final:"ـز"},  description:"Произносится как русский «з»."},
-  {id:12, arabic:"س", name:"Сийн",  transcription:"s",      sound:"С",            audio:BASE+'012-seen.mp3',  forms:{isolated:"س",  initial:"سـ", medial:"ـسـ", final:"ـس"},  description:"Произносится как русский «с»."},
-  {id:13, arabic:"ش", name:"Шийн",  transcription:"š / sh", sound:"Ш",            audio:BASE+'013-sheen.mp3', forms:{isolated:"ش",  initial:"شـ", medial:"ـشـ", final:"ـش"},  description:"Произносится как русский «ш»."},
-  {id:14, arabic:"ص", name:"Сад",   transcription:"ṣ",      sound:"С (эмфат.)",   audio:BASE+'014-saad.mp3',  forms:{isolated:"ص",  initial:"صـ", medial:"ـصـ", final:"ـص"},  description:"Эмфатический «с» — произносится с напряжением горла."},
-  {id:15, arabic:"ض", name:"Дад",   transcription:"ḍ",      sound:"Д (эмфат.)",   audio:BASE+'015-dhaad.mp3', forms:{isolated:"ض",  initial:"ضـ", medial:"ـضـ", final:"ـض"},  description:"Уникальный арабский эмфатический звук."},
-  {id:16, arabic:"ط", name:"Та",    transcription:"ṭ",      sound:"Т (эмфат.)",   audio:BASE+'016-toa.mp3',   forms:{isolated:"ط",  initial:"طـ", medial:"ـطـ", final:"ـط"},  description:"Эмфатический «т» — глубокий, напряжённый."},
-  {id:17, arabic:"ظ", name:"За",    transcription:"ẓ",      sound:"З (эмфат.)",   audio:BASE+'017-dhaa.mp3',  forms:{isolated:"ظ",  initial:"ظـ", medial:"ـظـ", final:"ـظ"},  description:"Эмфатический межзубный звук."},
+  {id:12, arabic:"س", name:"Син",   transcription:"s",      sound:"С",            audio:BASE+'012-seen.mp3',  forms:{isolated:"س",  initial:"سـ", medial:"ـسـ", final:"ـس"},  description:"Произносится как русский «с»."},
+  {id:13, arabic:"ش", name:"Щин",   transcription:"sh",     sound:"Щ",            audio:BASE+'013-sheen.mp3', forms:{isolated:"ش",  initial:"شـ", medial:"ـشـ", final:"ـش"},  description:"Произносится как русский «щ» или «ш»."},
+  {id:14, arabic:"ص", name:"Сод",   transcription:"ṣ",      sound:"Со",           audio:BASE+'014-saad.mp3',  forms:{isolated:"ص",  initial:"صـ", medial:"ـصـ", final:"ـص"},  description:"Эмфатический «с» — произносится с напряжением горла."},
+  {id:15, arabic:"ض", name:"Дод",   transcription:"ḍ",      sound:"До",           audio:BASE+'015-dhaad.mp3', forms:{isolated:"ض",  initial:"ضـ", medial:"ـضـ", final:"ـض"},  description:"Уникальный арабский эмфатический звук."},
+  {id:16, arabic:"ط", name:"Тоэ",   transcription:"ṭ",      sound:"То",           audio:BASE+'016-toa.mp3',   forms:{isolated:"ط",  initial:"طـ", medial:"ـطـ", final:"ـط"},  description:"Эмфатический «т» — глубокий, напряжённый."},
+  {id:17, arabic:"ظ", name:"Зоэ",   transcription:"ẓ",      sound:"Зо (межзуб.)", audio:BASE+'017-dhaa.mp3',  forms:{isolated:"ظ",  initial:"ظـ", medial:"ـظـ", final:"ـظ"},  description:"Эмфатический межзубный звук."},
   {id:18, arabic:"ع", name:"Айн",   transcription:"ʿ",      sound:"Айн",          audio:BASE+'018-ain.mp3',   forms:{isolated:"ع",  initial:"عـ", medial:"ـعـ", final:"ـع"},  description:"Уникальный гортанный звук — сжатие горла с голосом."},
-  {id:19, arabic:"غ", name:"Гайн",  transcription:"ġ / gh", sound:"Г (увуляр.)",  audio:BASE+'019-ghain.mp3', forms:{isolated:"غ",  initial:"غـ", medial:"ـغـ", final:"ـغ"},  description:"Похож на французский «р» — глубокий гортанный."},
+  {id:19, arabic:"غ", name:"Гайн",  transcription:"gh",     sound:"Г (увуляр.)",  audio:BASE+'019-ghain.mp3', forms:{isolated:"غ",  initial:"غـ", medial:"ـغـ", final:"ـغ"},  description:"Похож на французский «р» — глубокий гортанный."},
   {id:20, arabic:"ف", name:"Фа",    transcription:"f",      sound:"Ф",            audio:BASE+'020-faa.mp3',   forms:{isolated:"ف",  initial:"فـ", medial:"ـفـ", final:"ـف"},  description:"Произносится как русский «ф»."},
-  {id:21, arabic:"ق", name:"Каф",   transcription:"q",      sound:"К (увуляр.)",  audio:BASE+'021-qaaf.mp3',  forms:{isolated:"ق",  initial:"قـ", medial:"ـقـ", final:"ـق"},  description:"Глубокий «к» — из самой глубины горла."},
+  {id:21, arabic:"ق", name:"Қоф",   transcription:"q",      sound:"Ко",           audio:BASE+'021-qaaf.mp3',  forms:{isolated:"ق",  initial:"قـ", medial:"ـقـ", final:"ـق"},  description:"Глубокий «к» — из самой глубины горла."},
   {id:22, arabic:"ك", name:"Каф",   transcription:"k",      sound:"К",            audio:BASE+'022-kaaf.mp3',  forms:{isolated:"ك",  initial:"كـ", medial:"ـكـ", final:"ـك"},  description:"Произносится как русский «к»."},
   {id:23, arabic:"ل", name:"Лям",   transcription:"l",      sound:"Л",            audio:BASE+'023-laam.mp3',  forms:{isolated:"ل",  initial:"لـ", medial:"ـلـ", final:"ـل"},  description:"Произносится как русский «л»."},
-  {id:24, arabic:"م", name:"Мийм",  transcription:"m",      sound:"М",            audio:BASE+'024-meem.mp3',  forms:{isolated:"م",  initial:"مـ", medial:"ـمـ", final:"ـم"},  description:"Произносится как русский «м»."},
+  {id:24, arabic:"م", name:"Мим",   transcription:"m",      sound:"М",            audio:BASE+'024-meem.mp3',  forms:{isolated:"م",  initial:"مـ", medial:"ـمـ", final:"ـم"},  description:"Произносится как русский «м»."},
   {id:25, arabic:"ن", name:"Нун",   transcription:"n",      sound:"Н",            audio:BASE+'025-noon.mp3',  forms:{isolated:"ن",  initial:"نـ", medial:"ـنـ", final:"ـن"},  description:"Произносится как русский «н»."},
-  {id:26, arabic:"ه", name:"Ха",    transcription:"h",      sound:"Х (лёгкий)",   audio:BASE+'027-ha.mp3',    forms:{isolated:"ه",  initial:"هـ", medial:"ـهـ", final:"ـه"},  description:"Лёгкий «х», как выдох."},
-  {id:27, arabic:"و", name:"Вав",   transcription:"w / ū",  sound:"В / У",        audio:BASE+'026-waw.mp3',   forms:{isolated:"و",  initial:"و",  medial:"ـو",  final:"ـو"},  description:"Согласный «в» или долгий «у»."},
+  {id:26, arabic:"ه", name:"Ха",    transcription:"h",      sound:"һ",            audio:BASE+'027-ha.mp3',    forms:{isolated:"ه",  initial:"هـ", medial:"ـهـ", final:"ـه"},  description:"Мягкий «h» — как английское h в слове «home». Лёгкий выдох."},
+  {id:27, arabic:"و", name:"Уау",   transcription:"w / ū",  sound:"Уау",          audio:BASE+'026-waw.mp3',   forms:{isolated:"و",  initial:"و",  medial:"ـو",  final:"ـو"},  description:"Согласный «в» или долгий «у»."},
   {id:28, arabic:"ي", name:"Йа",    transcription:"y / ī",  sound:"Й / И",        audio:BASE+'029-yaa.mp3',   forms:{isolated:"ي",  initial:"يـ", medial:"ـيـ", final:"ـي"},  description:"Согласный «й» или долгий «и»."},
 ];
 
@@ -413,10 +485,13 @@ window.addEventListener('load', () => {
 
 // ── VIEWS ──
 function showView(v){
-  document.getElementById('view-alphabet').style.display = v==='alphabet'?'':'none';
-  document.getElementById('view-quiz').style.display     = v==='quiz'?'':'none';
+  document.getElementById('view-alphabet').style.display  = v==='alphabet'?'':'none';
+  document.getElementById('view-harakaat').style.display  = v==='harakaat'?'':'none';
+  document.getElementById('view-quiz').style.display      = v==='quiz'?'':'none';
   document.getElementById('nav-alphabet').classList.toggle('active', v==='alphabet');
+  document.getElementById('nav-harakaat').classList.toggle('active', v==='harakaat');
   document.getElementById('nav-quiz').classList.toggle('active', v==='quiz');
+  if(v==='harakaat') renderHarakaat();
 }
 
 // ── ALPHABET ──
@@ -443,22 +518,133 @@ function playLetterAudio(url){
 
 // ── MODAL ──
 let modalAudioUrl = '';
-function openModal(id){
-  const l=alphabet.find(x=>x.id===id);
+let modalIdx = 0;
+
+function fillModal(l){
   modalAudioUrl = l.audio;
   document.getElementById('m-arabic').textContent=l.arabic;
   document.getElementById('m-name').textContent=l.name;
   document.getElementById('m-trans').textContent=l.transcription;
   document.getElementById('m-sound').textContent='Звук: '+l.sound;
   document.getElementById('m-desc').textContent=l.description;
-  document.getElementById('m-forms').innerHTML=[['isolated','Изолир.'],['initial','Начало'],['medial','Середина'],['final','Конец']]
+  // RTL: Изолир. → Конец → Середина → Начало
+  document.getElementById('m-forms').innerHTML=[['isolated','Изолир.'],['final','Конец'],['medial','Середина'],['initial','Начало']]
     .map(([k,lbl])=>`<div class="form-cell"><div class="form-arabic">${l.forms[k]}</div><div class="form-label">${lbl}</div></div>`).join('');
+}
+
+function openModal(id){
+  modalIdx = alphabet.findIndex(x=>x.id===id);
+  fillModal(alphabet[modalIdx]);
   document.getElementById('modal').style.display='flex';
   document.body.style.overflow='hidden';
 }
+
+function navigateModal(dir){
+  modalIdx = (modalIdx + dir + alphabet.length) % alphabet.length;
+  fillModal(alphabet[modalIdx]);
+}
+
 function closeModal(){
   document.getElementById('modal').style.display='none';
   document.body.style.overflow='';
+}
+
+// ── SWIPE on modal ──
+(function(){
+  let sx=0, sy=0;
+  document.addEventListener('touchstart',e=>{
+    if(!document.getElementById('modal-inner').contains(e.target)) return;
+    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(document.getElementById('modal').style.display==='none') return;
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){
+      // свайп вправо = предыдущая буква (т.к. арабский RTL)
+      navigateModal(dx>0 ? -1 : 1);
+    }
+  },{passive:true});
+})();
+
+// ── HARAKAAT ──
+const harakaat = [
+  {
+    sign: "بَ", name: "Фатха", arabicName: "فَتْحَة",
+    rule: "Маленькая чёрточка сверху буквы", sound: "а",
+    description: "Даёт короткий звук «а». Самая распространённая огласовка в арабском языке."
+  },
+  {
+    sign: "بِ", name: "Касра", arabicName: "كَسْرَة",
+    rule: "Маленькая чёрточка снизу буквы", sound: "и",
+    description: "Даёт короткий звук «и». Пишется под буквой."
+  },
+  {
+    sign: "بُ", name: "Дамма", arabicName: "ضَمَّة",
+    rule: "Маленький завиток сверху буквы", sound: "у",
+    description: "Даёт короткий звук «у». Похожа на маленькую букву «و»."
+  },
+  {
+    sign: "بْ", name: "Сукун", arabicName: "سُكُون",
+    rule: "Маленький кружок сверху буквы", sound: "—",
+    description: "Означает отсутствие гласной. Буква читается без добавления звука."
+  },
+  {
+    sign: "بّ", name: "Шадда", arabicName: "شَدَّة",
+    rule: "Знак в виде «w» сверху буквы", sound: "×2",
+    description: "Удвоение буквы. Буква произносится с усилением — как будто она написана дважды."
+  },
+  {
+    sign: "بً", name: "Танвин фатха", arabicName: "تَنْوِين فَتْح",
+    rule: "Две чёрточки сверху (ан)", sound: "ан",
+    description: "Звук «ан» в конце слова. Признак неопределённости существительного."
+  },
+  {
+    sign: "بٍ", name: "Танвин касра", arabicName: "تَنْوِين كَسْر",
+    rule: "Две чёрточки снизу (ин)", sound: "ин",
+    description: "Звук «ин» в конце слова. Признак неопределённости существительного."
+  },
+  {
+    sign: "بٌ", name: "Танвин дамма", arabicName: "تَنْوِين ضَمّ",
+    rule: "Двойной завиток сверху (ун)", sound: "ун",
+    description: "Звук «ун» в конце слова. Признак неопределённости существительного."
+  },
+];
+
+function renderHarakaat(){
+  document.getElementById('view-harakaat').innerHTML=`
+    <p class="section-label">✦ Огласовки · знаки произношения ✦</p>
+    <div class="harakaat-intro">
+      <div class="harakaat-intro-title">Что такое харакаты?</div>
+      <div class="harakaat-intro-text">
+        Харакаты — это небольшие значки над и под буквами, которые показывают как читать гласные звуки. В учебных текстах и Коране они всегда есть. В обычных текстах их часто не пишут — поэтому важно знать их наизусть.
+      </div>
+    </div>
+    <div class="harakaat-list">
+      ${harakaat.map((h,i)=>`
+        <div class="harakaat-card" onclick="showHarakaatModal(${i})">
+          <div class="harakaat-sign">${h.sign}</div>
+          <div class="harakaat-info">
+            <div class="harakaat-name">${h.name}</div>
+            <div class="harakaat-arabic-name">${h.arabicName}</div>
+            <div class="harakaat-rule">${h.rule}</div>
+          </div>
+          <div class="harakaat-sound">«${h.sound}»</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function showHarakaatModal(idx){
+  const h = harakaat[idx];
+  document.getElementById('m-arabic').textContent = h.sign;
+  document.getElementById('m-name').textContent = h.name;
+  document.getElementById('m-trans').textContent = h.arabicName;
+  document.getElementById('m-sound').textContent = 'Звук: «' + h.sound + '»';
+  document.getElementById('m-desc').textContent = h.description;
+  document.getElementById('m-forms').innerHTML = `<div style="text-align:center;padding:0.5rem 0;color:rgba(26,58,26,0.6);font-size:0.9rem;font-style:italic;">${h.rule}</div>`;
+  modalAudioUrl = '';
+  document.getElementById('modal').style.display='flex';
+  document.body.style.overflow='hidden';
 }
 
 // ── QUIZ ──
@@ -493,9 +679,9 @@ function renderQuiz(){
         <span class="quiz-progress-label ${quizScore>0?'green':''}">${quizScore>0?'✓ '+quizScore:''}</span>
         <span class="quiz-progress-label">${quizIdx+1} / ${TOTAL_Q}</span>
       </div>
-      <div class="quiz-letter-display" onclick="playLetterAudio('${q.correct.audio}')" title="Нажмите для произношения">
+      <div class="quiz-letter-display">
         <div class="quiz-big-arabic">${q.correct.arabic}</div>
-        <div class="quiz-hint">🔊 нажмите для произношения</div>
+        <div class="quiz-hint">Какая это буква?</div>
       </div>
       <div class="quiz-options">
         ${q.options.map(opt=>`
