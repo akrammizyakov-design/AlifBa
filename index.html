@@ -263,6 +263,23 @@
       text-align: center; flex-shrink: 0;
     }
 
+    /* ── VOWEL SYLLABLES ── */
+    .vowel-syllables { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem; margin: 0.5rem 0; direction: rtl; width: 100%; grid-column: 1/-1; }
+    .vowel-cell {
+      border: 1.5px solid var(--green-border);
+      border-radius: 14px; padding: 1.1rem 0.3rem;
+      text-align: center; cursor: pointer;
+      background: rgba(34,120,34,0.03);
+      transition: all 0.18s;
+      -webkit-tap-highlight-color: transparent;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 110px;
+    }
+    .vowel-cell:active { background: rgba(34,120,34,0.12); transform: scale(0.95); }
+    .vowel-arabic { font-size: 2rem; color: var(--green); direction: rtl; line-height: 1.2; }
+    .vowel-read { font-size: 1.1rem; color: var(--text); font-weight: 600; margin: 0.3rem 0 0.15rem; }
+    .vowel-label { font-size: 0.5rem; color: var(--text-muted); font-family: 'Cinzel', serif; letter-spacing: 0.06em; text-transform: uppercase; }
+
     /* ── MODAL NAV (swipe) ── */
     .modal-nav-hint {
       font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase;
@@ -516,6 +533,28 @@ function playLetterAudio(url){
   currentAudio.play().catch(()=>{});
 }
 
+function playSyllable(url, text){
+  if(currentAudio){ currentAudio.pause(); currentAudio.currentTime=0; }
+  const audio = new Audio(url);
+  audio.play().then(()=>{
+    currentAudio = audio;
+  }).catch(()=>{
+    // MP3 не найден — используем Web Speech API
+    if('speechSynthesis' in window){
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ar-SA';
+      u.rate = 0.8;
+      // если арабский голос не найден — произносим по-русски
+      const voices = window.speechSynthesis.getVoices();
+      const arVoice = voices.find(v=>v.lang.startsWith('ar'));
+      if(arVoice) u.voice = arVoice;
+      else { u.lang = 'ru-RU'; }
+      window.speechSynthesis.speak(u);
+    }
+  });
+}
+
 // ── MODAL ──
 let modalAudioUrl = '';
 let modalIdx = 0;
@@ -631,6 +670,17 @@ function renderHarakaat(){
           </div>
           <div class="harakaat-sound">«${h.sound}»</div>
         </div>`).join('')}
+    </div>
+
+    <div style="margin-top:2rem;">
+      <p class="section-label">✦ Практика · нажмите на букву ✦</p>
+      <div class="alphabet-grid">
+        ${alphabet.map(l=>`
+          <div class="letter-card" onclick="openVowelModal(${l.id})">
+            <span class="arabic-char">${l.arabic}</span>
+            <span class="latin-name">${l.name}</span>
+          </div>`).join('')}
+      </div>
     </div>`;
 }
 
@@ -643,6 +693,47 @@ function showHarakaatModal(idx){
   document.getElementById('m-desc').textContent = h.description;
   document.getElementById('m-forms').innerHTML = `<div style="text-align:center;padding:0.5rem 0;color:rgba(26,58,26,0.6);font-size:0.9rem;font-style:italic;">${h.rule}</div>`;
   modalAudioUrl = '';
+  document.getElementById('modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+
+function openVowelModal(id){
+  const l = alphabet.find(x=>x.id===id);
+  const fatha  = l.arabic + 'َ';
+  const kasra  = l.arabic + 'ِ';
+  const damma  = l.arabic + 'ُ';
+  const readFatha = l.sound.split(' ')[0] + 'а';
+  const readKasra = l.sound.split(' ')[0] + 'и';
+  const readDamma = l.sound.split(' ')[0] + 'у';
+
+  document.getElementById('m-arabic').textContent = l.arabic;
+  document.getElementById('m-name').textContent = l.name;
+  document.getElementById('m-trans').textContent = '';
+  document.getElementById('m-sound').textContent = '';
+  document.getElementById('m-desc').textContent = 'Нажмите на слог чтобы услышать произношение';
+  const mf = document.getElementById('m-forms');
+  mf.style.display = 'block';
+  const sid = String(l.id).padStart(3,'0');
+  const sfBase = BASE + 'syllables/' + sid;
+  mf.innerHTML = `
+    <div class="vowel-syllables">
+      <div class="vowel-cell" onclick="playSyllable('${sfBase}-damma.mp3','${readDamma}')">
+        <div class="vowel-arabic">${damma}</div>
+        <div class="vowel-read">${readDamma}</div>
+        <div class="vowel-label">Дамма · у</div>
+      </div>
+      <div class="vowel-cell" onclick="playSyllable('${sfBase}-kasra.mp3','${readKasra}')">
+        <div class="vowel-arabic">${kasra}</div>
+        <div class="vowel-read">${readKasra}</div>
+        <div class="vowel-label">Касра · и</div>
+      </div>
+      <div class="vowel-cell" onclick="playSyllable('${sfBase}-fatha.mp3','${readFatha}')">
+        <div class="vowel-arabic">${fatha}</div>
+        <div class="vowel-read">${readFatha}</div>
+        <div class="vowel-label">Фатха · а</div>
+      </div>
+    </div>`;
+  modalAudioUrl = l.audio;
   document.getElementById('modal').style.display='flex';
   document.body.style.overflow='hidden';
 }
