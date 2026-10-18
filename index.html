@@ -22,21 +22,26 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green: #1e7a1e;
-      --green-dark: #155015;
-      --green-border: rgba(34,120,34,0.22);
-      --green-light: rgba(34,120,34,0.07);
-      --text: #1a3a1a;
-      --text-muted: rgba(30,80,30,0.52);
-      --bg: #f0f7f0;
-      --white: #ffffff;
+      --bg:        #0a2d1a;
+      --bg2:       #0d3820;
+      --gold:      #d4a820;
+      --gold-lt:   #f0c840;
+      --gold-dim:  rgba(212,168,32,0.18);
+      --cream:     #f5f0e0;
+      --cream-dk:  #e8e0c8;
+      --text-dk:   #1a2e1a;
+      --text-card: #1a3020;
+      --text-muted:#6a8a6a;
+      --nav-bg:    #0d3820;
+      --nav-active:#d4a820;
+      --ornament:  rgba(212,168,32,0.07);
     }
 
     html, body { height: 100%; overscroll-behavior: none; }
 
     body {
       background: var(--bg);
-      color: var(--text);
+      color: var(--cream);
       font-family: 'Crimson Pro', Georgia, serif;
       min-height: 100vh;
       min-height: -webkit-fill-available;
@@ -44,40 +49,30 @@
 
     .app {
       min-height: 100vh;
-      background: linear-gradient(160deg, #fff 0%, #e8f5e8 50%, #d4edd4 100%);
+      background: var(--bg);
       position: relative;
       overflow-x: hidden;
     }
 
+    /* Исламский орнамент — SVG паттерн */
     .app::before {
       content: '';
       position: fixed; inset: 0;
-      background:
-        radial-gradient(circle at 10% 5%, rgba(34,120,34,0.07) 0%, transparent 45%),
-        radial-gradient(circle at 90% 95%, rgba(20,100,20,0.06) 0%, transparent 45%);
-      pointer-events: none; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(212,168,32,0.08)' stroke-width='0.5'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z'/%3E%3Ccircle cx='30' cy='30' r='12'/%3E%3Cpath d='M30 18 L42 30 L30 42 L18 30 Z'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0; opacity: 0.6;
     }
-
-    .ornament {
-      position: fixed;
-      font-size: 18rem;
-      color: rgba(34,120,34,0.035);
-      pointer-events: none; z-index: 0;
-      line-height: 1; user-select: none; direction: rtl;
-    }
-    .ornament.tl { top: -3rem; left: -2rem; }
-    .ornament.br { bottom: -3rem; right: -2rem; transform: rotate(180deg); }
 
     .container {
       position: relative; z-index: 1;
-      max-width: 640px; margin: 0 auto;
-      padding: 0 1rem 6rem;
+      max-width: 480px; margin: 0 auto;
+      padding: 0 0.75rem 5.5rem;
     }
 
     /* ── SPLASH ── */
     #splash {
       position: fixed; inset: 0;
-      background: var(--green);
+      background: var(--bg);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       z-index: 999;
@@ -85,87 +80,101 @@
     }
     #splash.hide { opacity: 0; transform: scale(1.06); pointer-events: none; }
     .splash-icon {
-      width: 120px; height: 120px;
-      background: rgba(255,255,255,0.13);
-      border-radius: 30px;
+      width: 110px; height: 110px;
+      background: var(--bg2);
+      border: 2px solid var(--gold-dim);
+      border-radius: 28px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 3.8rem; direction: rtl;
+      font-size: 3.4rem; direction: rtl;
       margin-bottom: 1.4rem;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,168,32,0.2);
+      color: var(--gold);
     }
     .splash-title {
       font-family: 'Cinzel', serif;
-      font-size: 2.2rem; font-weight: 700;
-      color: white; letter-spacing: 0.1em;
+      font-size: 2.4rem; font-weight: 700;
+      color: var(--gold); letter-spacing: 0.08em;
     }
     .splash-sub {
       font-size: 1rem;
-      color: rgba(255,255,255,0.65);
+      color: rgba(245,240,224,0.6);
       font-style: italic; margin-top: 0.4rem;
     }
 
     /* ── HEADER ── */
     .header {
       text-align: center;
-      padding: 2.5rem 0 1.8rem;
-      border-bottom: 1px solid var(--green-border);
-      margin-bottom: 1.8rem;
+      padding: 1.6rem 0 1rem;
+      margin-bottom: 0.5rem;
     }
     .header-icon {
-      width: 68px; height: 68px;
-      background: var(--green);
-      border-radius: 18px;
+      width: 58px; height: 58px;
+      background: var(--bg2);
+      border: 1.5px solid rgba(212,168,32,0.35);
+      border-radius: 16px;
       display: inline-flex; align-items: center; justify-content: center;
-      font-size: 2rem; direction: rtl;
-      margin-bottom: 0.8rem;
-      box-shadow: 0 4px 18px rgba(34,120,34,0.28);
+      font-size: 1.8rem; direction: rtl;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      color: var(--gold);
     }
     .header h1 {
       font-family: 'Cinzel', serif;
-      font-size: 1.7rem; font-weight: 700;
-      color: var(--green); letter-spacing: 0.12em;
+      font-size: 1.6rem; font-weight: 700;
+      color: var(--gold); letter-spacing: 0.1em;
     }
     .header p {
-      font-size: 1rem; color: var(--text-muted);
-      font-style: italic; margin-top: 0.3rem;
+      font-size: 0.85rem; color: rgba(245,240,224,0.65);
+      font-style: italic; margin-top: 0.2rem;
     }
 
     /* ── SECTION LABEL ── */
     .section-label {
       font-family: 'Cinzel', serif;
-      font-size: 0.65rem; letter-spacing: 0.22em;
+      font-size: 0.58rem; letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(34,120,34,0.5);
-      text-align: center; margin-bottom: 1.2rem;
+      color: var(--gold);
+      text-align: center; margin-bottom: 0.7rem;
+      opacity: 0.75;
     }
 
-    /* ── ALPHABET GRID ── */
+    /* ── ALPHABET GRID — 4 колонки, всё на экране ── */
     .alphabet-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
-      gap: 0.6rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.45rem;
       direction: rtl;
     }
     .letter-card {
-      aspect-ratio: 1;
+      aspect-ratio: 0.95;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      border: 1px solid var(--green-border);
-      background: var(--white);
-      box-shadow: 0 2px 6px rgba(34,120,34,0.07);
-      border-radius: 12px;
-      cursor: pointer; gap: 0.25rem;
-      transition: all 0.2s ease;
+      background: var(--cream);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.6) inset;
+      border-radius: 10px;
+      cursor: pointer; gap: 0.15rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .letter-card:active { transform: scale(0.94); background: rgba(34,120,34,0.06); }
-    .letter-card .arabic-char { font-size: 2rem; color: var(--green); line-height: 1; direction: rtl; }
-    .letter-card .latin-name { font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.04em; font-family: 'Cinzel', serif; }
+    .letter-card:active {
+      transform: scale(0.92);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .letter-card .arabic-char {
+      font-size: 1.55rem; color: var(--text-card);
+      line-height: 1; direction: rtl;
+      font-weight: 600;
+    }
+    .letter-card .latin-name {
+      font-size: 0.5rem; color: #5a7a5a;
+      letter-spacing: 0.02em;
+      font-family: 'Cinzel', serif;
+    }
 
     /* ── MODAL (bottom sheet) ── */
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(10,40,10,0.6);
+      background: rgba(5,18,8,0.75);
       z-index: 200;
       display: flex; align-items: flex-end; justify-content: center;
       backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -173,222 +182,206 @@
     }
     @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
     .modal {
-      background: var(--white);
+      background: var(--cream);
       border-radius: 24px 24px 0 0;
-      width: 100%; max-width: 640px;
+      width: 100%; max-width: 480px;
       padding: 1.5rem 2rem 3rem;
       text-align: center;
       animation: slideUp 0.3s ease;
       max-height: 92vh; overflow-y: auto;
     }
     @keyframes slideUp { from { transform: translateY(60px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-    .modal-handle { width: 40px; height: 4px; background: rgba(34,120,34,0.18); border-radius: 2px; margin: 0 auto 1.5rem; }
-    .modal-arabic { font-size: 6rem; color: var(--green); line-height: 1.1; direction: rtl; text-shadow: 0 0 40px rgba(34,120,34,0.18); margin-bottom: 0.4rem; }
-    .modal-name { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--text); letter-spacing: 0.08em; margin-bottom: 0.2rem; }
-    .modal-transcription { font-size: 1.4rem; color: var(--green); font-style: italic; font-weight: 300; margin-bottom: 0.15rem; }
+    .modal-handle { width: 40px; height: 4px; background: rgba(26,48,32,0.18); border-radius: 2px; margin: 0 auto 1.5rem; }
+    .modal-arabic { font-size: 6rem; color: var(--text-card); line-height: 1.1; direction: rtl; margin-bottom: 0.4rem; }
+    .modal-name { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--text-dk); letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+    .modal-transcription { font-size: 1.4rem; color: #2a6a2a; font-style: italic; font-weight: 300; margin-bottom: 0.15rem; }
     .modal-sound { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); font-family: 'Cinzel', serif; margin-bottom: 1.2rem; }
-    .modal-divider { width: 36px; height: 1px; background: var(--green-border); margin: 0 auto 1.2rem; }
-    .modal-description { font-size: 1rem; color: rgba(26,58,26,0.7); line-height: 1.7; font-weight: 300; margin-bottom: 1.4rem; }
+    .modal-divider { width: 36px; height: 1px; background: rgba(26,48,32,0.15); margin: 0 auto 1.2rem; }
+    .modal-description { font-size: 1rem; color: rgba(26,48,26,0.72); line-height: 1.7; font-weight: 300; margin-bottom: 1.4rem; }
     .modal-forms { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.4rem; margin-bottom: 1.8rem; }
-    .form-cell { border: 1px solid var(--green-border); background: rgba(34,120,34,0.03); padding: 0.5rem 0.2rem; border-radius: 8px; }
-    .form-arabic { font-size: 1.3rem; color: #2a8a2a; direction: rtl; line-height: 1; }
+    .form-cell { border: 1px solid rgba(26,48,32,0.12); background: rgba(26,48,32,0.04); padding: 0.5rem 0.2rem; border-radius: 8px; }
+    .form-arabic { font-size: 1.3rem; color: #2a6a2a; direction: rtl; line-height: 1; }
     .form-label { font-size: 0.5rem; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Cinzel', serif; margin-top: 0.25rem; }
     .modal-close {
-      background: var(--green); border: none; color: white;
+      background: #1a5a1a; border: none; color: white;
       font-family: 'Cinzel', serif; font-size: 0.75rem;
       letter-spacing: 0.12em; text-transform: uppercase;
       padding: 0.8rem 2rem; border-radius: 10px;
       cursor: pointer; width: 100%;
-      box-shadow: 0 3px 12px rgba(34,120,34,0.3);
+      box-shadow: 0 3px 12px rgba(26,90,26,0.4);
       -webkit-tap-highlight-color: transparent;
     }
 
     /* ── HARAKAAT ── */
     .harakaat-intro {
-      background: var(--white);
-      border: 1px solid var(--green-border);
-      border-radius: 16px;
-      padding: 1.2rem 1.4rem;
-      margin-bottom: 1.6rem;
-      box-shadow: 0 2px 8px rgba(34,120,34,0.06);
+      background: var(--cream);
+      border-radius: 14px;
+      padding: 1.1rem 1.3rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
     }
     .harakaat-intro-title {
       font-family: 'Cinzel', serif;
-      font-size: 0.7rem; letter-spacing: 0.16em;
-      text-transform: uppercase; color: var(--green);
-      margin-bottom: 0.5rem;
+      font-size: 0.65rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: #1a5a1a;
+      margin-bottom: 0.4rem;
     }
     .harakaat-intro-text {
-      font-size: 0.95rem; color: rgba(26,58,26,0.72);
-      line-height: 1.65; font-weight: 300;
+      font-size: 0.9rem; color: rgba(26,48,26,0.75);
+      line-height: 1.6; font-weight: 300;
     }
-    .harakaat-list { display: flex; flex-direction: column; gap: 1rem; }
+    .harakaat-list { display: flex; flex-direction: column; gap: 0.7rem; }
     .harakaat-card {
-      background: var(--white);
-      border: 1px solid var(--green-border);
-      border-radius: 16px;
-      padding: 1.4rem 1.6rem;
-      display: flex; align-items: center; gap: 1.4rem;
-      box-shadow: 0 2px 10px rgba(34,120,34,0.07);
+      background: var(--cream);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      display: flex; align-items: center; gap: 1rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: all 0.18s;
+      transition: transform 0.15s;
     }
-    .harakaat-card:active { transform: scale(0.98); background: rgba(34,120,34,0.04); }
-    .harakaat-sign {
-      font-size: 3.2rem; color: var(--green);
-      direction: rtl; line-height: 1;
-      min-width: 64px; text-align: center;
-      flex-shrink: 0;
-    }
+    .harakaat-card:active { transform: scale(0.97); }
+    .harakaat-sign { font-size: 2.8rem; color: #1a5a1a; direction: rtl; line-height: 1; min-width: 56px; text-align: center; flex-shrink: 0; }
     .harakaat-info { flex: 1; text-align: left; }
-    .harakaat-name {
-      font-family: 'Cinzel', serif;
-      font-size: 0.9rem; font-weight: 600;
-      color: var(--text); letter-spacing: 0.06em;
-      margin-bottom: 0.2rem;
-    }
-    .harakaat-arabic-name {
-      font-size: 0.8rem; color: var(--green);
-      direction: rtl; margin-bottom: 0.3rem;
-    }
-    .harakaat-rule {
-      font-size: 0.88rem; color: rgba(26,58,26,0.65);
-      line-height: 1.5; font-weight: 300;
-    }
-    .harakaat-sound {
-      font-family: 'Cinzel', serif;
-      font-size: 1.4rem; font-weight: 600;
-      color: var(--green); min-width: 36px;
-      text-align: center; flex-shrink: 0;
-    }
+    .harakaat-name { font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 600; color: var(--text-dk); letter-spacing: 0.06em; margin-bottom: 0.15rem; }
+    .harakaat-arabic-name { font-size: 0.78rem; color: #1a5a1a; direction: rtl; margin-bottom: 0.2rem; }
+    .harakaat-rule { font-size: 0.82rem; color: rgba(26,48,26,0.65); line-height: 1.5; font-weight: 300; }
+    .harakaat-sound { font-family: 'Cinzel', serif; font-size: 1.3rem; font-weight: 600; color: #1a5a1a; min-width: 36px; text-align: center; flex-shrink: 0; }
 
     /* ── VOWEL SYLLABLES ── */
     .vowel-syllables { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem; margin: 0.5rem 0; direction: rtl; width: 100%; grid-column: 1/-1; }
     .vowel-cell {
-      border: 1.5px solid var(--green-border);
-      border-radius: 14px; padding: 1.1rem 0.3rem;
+      border: 1.5px solid rgba(26,48,32,0.14);
+      border-radius: 14px; padding: 1rem 0.3rem;
       text-align: center; cursor: pointer;
-      background: rgba(34,120,34,0.03);
+      background: rgba(26,48,32,0.04);
       transition: all 0.18s;
       -webkit-tap-highlight-color: transparent;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 110px;
+      min-height: 100px;
     }
-    .vowel-cell:active { background: rgba(34,120,34,0.12); transform: scale(0.95); }
-    .vowel-arabic { font-size: 2rem; color: var(--green); direction: rtl; line-height: 1.2; }
-    .vowel-read { font-size: 1.1rem; color: var(--text); font-weight: 600; margin: 0.3rem 0 0.15rem; }
-    .vowel-label { font-size: 0.5rem; color: var(--text-muted); font-family: 'Cinzel', serif; letter-spacing: 0.06em; text-transform: uppercase; }
+    .vowel-cell:active { background: rgba(26,90,26,0.12); transform: scale(0.95); }
+    .vowel-arabic { font-size: 1.8rem; color: #1a5a1a; direction: rtl; line-height: 1.2; }
+    .vowel-read { font-size: 1rem; color: var(--text-dk); font-weight: 600; margin: 0.25rem 0 0.1rem; }
+    .vowel-label { font-size: 0.48rem; color: var(--text-muted); font-family: 'Cinzel', serif; letter-spacing: 0.06em; text-transform: uppercase; }
 
     /* ── MODAL NAV (swipe) ── */
     .modal-nav-hint {
       font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase;
-      color: rgba(34,120,34,0.3); font-family: 'Cinzel', serif;
+      color: rgba(26,48,32,0.3); font-family: 'Cinzel', serif;
       text-align: center; margin-bottom: 1rem;
     }
 
     /* ── QUIZ ── */
-    .quiz-wrap { max-width: 500px; margin: 0 auto; }
-    .quiz-progress-bar { height: 4px; background: rgba(34,120,34,0.12); border-radius: 2px; margin-bottom: 0.5rem; }
-    .quiz-progress-fill { height: 100%; background: linear-gradient(90deg, rgba(34,120,34,0.4), var(--green)); border-radius: 2px; transition: width 0.5s ease; }
-    .quiz-progress-row { display: flex; justify-content: space-between; margin-bottom: 1.8rem; }
-    .quiz-progress-label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-muted); }
-    .quiz-progress-label.green { color: var(--green); font-weight: 600; }
+    .quiz-wrap { max-width: 480px; margin: 0 auto; }
+    .quiz-progress-bar { height: 4px; background: rgba(212,168,32,0.15); border-radius: 2px; margin-bottom: 0.5rem; }
+    .quiz-progress-fill { height: 100%; background: linear-gradient(90deg, rgba(212,168,32,0.5), var(--gold)); border-radius: 2px; transition: width 0.5s ease; }
+    .quiz-progress-row { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+    .quiz-progress-label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; color: rgba(245,240,224,0.5); }
+    .quiz-progress-label.green { color: var(--gold); font-weight: 600; }
 
     .quiz-letter-display {
-      text-align: center; margin-bottom: 2rem;
-      background: var(--white); border-radius: 20px;
-      padding: 2rem 1rem;
-      box-shadow: 0 4px 20px rgba(34,120,34,0.08);
-      border: 1px solid var(--green-border);
+      text-align: center; margin-bottom: 1.5rem;
+      background: var(--cream); border-radius: 16px;
+      padding: 1.8rem 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
-    .quiz-big-arabic { font-size: 8rem; color: var(--green); direction: rtl; line-height: 1; text-shadow: 0 0 40px rgba(34,120,34,0.15); }
-    .quiz-hint { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(30,80,30,0.3); font-family: 'Cinzel', serif; margin-top: 0.5rem; }
+    .quiz-big-arabic { font-size: 7rem; color: var(--text-card); direction: rtl; line-height: 1; }
+    .quiz-hint { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(26,48,32,0.35); font-family: 'Cinzel', serif; margin-top: 0.4rem; }
 
-    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
     .quiz-option {
-      padding: 1rem 0.8rem;
-      border: 1.5px solid var(--green-border);
-      background: var(--white);
-      box-shadow: 0 2px 8px rgba(34,120,34,0.06);
-      color: var(--text); cursor: pointer;
+      padding: 0.9rem 0.7rem;
+      border: 1.5px solid rgba(212,168,32,0.2);
+      background: var(--bg2);
+      color: var(--cream); cursor: pointer;
       text-align: center; border-radius: 12px;
       transition: all 0.2s;
       -webkit-tap-highlight-color: transparent;
     }
     .quiz-option:active:not(:disabled) { transform: scale(0.96); }
-    .opt-transcription { font-size: 1.3rem; color: var(--green); font-style: italic; display: block; font-weight: 300; margin-bottom: 0.1rem; }
-    .opt-name { font-size: 0.6rem; font-family: 'Cinzel', serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .opt-transcription { font-size: 1.2rem; color: var(--gold); font-style: italic; display: block; font-weight: 300; margin-bottom: 0.1rem; }
+    .opt-name { font-size: 0.58rem; font-family: 'Cinzel', serif; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(245,240,224,0.5); }
 
-    .quiz-option.correct { border-color: #1a9a1a; background: rgba(30,150,30,0.1); box-shadow: 0 0 0 2px rgba(30,150,30,0.2); animation: pulse-green 0.35s ease; }
-    .quiz-option.correct .opt-transcription, .quiz-option.correct .opt-name { color: #1a7a1a; }
-    .quiz-option.wrong { border-color: rgba(200,60,60,0.7); background: rgba(200,60,60,0.08); animation: shake 0.35s ease; }
-    .quiz-option.wrong .opt-transcription, .quiz-option.wrong .opt-name { color: #b03030; }
+    .quiz-option.correct { border-color: #4ab84a; background: rgba(74,184,74,0.15); }
+    .quiz-option.correct .opt-transcription, .quiz-option.correct .opt-name { color: #6dd46d; }
+    .quiz-option.wrong { border-color: rgba(200,60,60,0.7); background: rgba(200,60,60,0.12); animation: shake 0.35s ease; }
+    .quiz-option.wrong .opt-transcription, .quiz-option.wrong .opt-name { color: #e07070; }
     .quiz-option.dimmed { opacity: 0.28; }
 
     @keyframes pulse-green { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
     @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
 
-    .quiz-feedback { text-align: center; margin-top: 1.2rem; min-height: 2rem; font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; }
-    .quiz-feedback.ok { color: #1a7a1a; }
-    .quiz-feedback.err { color: #b03030; }
+    .quiz-feedback { text-align: center; margin-top: 1rem; min-height: 2rem; font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    .quiz-feedback.ok { color: #6dd46d; }
+    .quiz-feedback.err { color: #e07070; }
 
     .quiz-next-btn {
-      display: block; margin: 1.2rem auto 0;
-      padding: 0.8rem 2.5rem;
-      background: var(--green); border: none; color: white;
-      font-family: 'Cinzel', serif; font-size: 0.75rem;
+      display: block; margin: 1rem auto 0;
+      padding: 0.75rem 2.5rem;
+      background: var(--gold); border: none; color: #1a2e1a;
+      font-family: 'Cinzel', serif; font-size: 0.75rem; font-weight: 700;
       letter-spacing: 0.12em; text-transform: uppercase;
       cursor: pointer; border-radius: 10px;
-      box-shadow: 0 3px 12px rgba(34,120,34,0.3);
+      box-shadow: 0 3px 12px rgba(212,168,32,0.4);
       -webkit-tap-highlight-color: transparent;
     }
 
     /* ── RESULT ── */
     .result-wrap { text-align: center; padding: 2rem 0; }
-    .result-icon { width: 90px; height: 90px; background: var(--green); border-radius: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 2.8rem; direction: rtl; margin-bottom: 1.2rem; box-shadow: 0 6px 24px rgba(34,120,34,0.3); }
-    .result-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--green); letter-spacing: 0.1em; margin-bottom: 0.4rem; }
-    .result-score { font-size: 4rem; font-weight: 300; color: var(--text); line-height: 1; }
-    .result-score span { font-size: 1.2rem; color: var(--text-muted); }
-    .result-msg { font-size: 1rem; color: var(--text-muted); font-style: italic; margin: 0.8rem 0 2rem; }
-    .result-restart { padding: 0.8rem 2.5rem; background: var(--green); border: none; color: white; font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 10px; box-shadow: 0 3px 14px rgba(34,120,34,0.3); -webkit-tap-highlight-color: transparent; }
+    .result-icon { width: 80px; height: 80px; background: var(--bg2); border: 2px solid var(--gold-dim); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 2.4rem; direction: rtl; margin-bottom: 1.2rem; color: var(--gold); }
+    .result-title { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .result-score { font-size: 4rem; font-weight: 300; color: var(--cream); line-height: 1; }
+    .result-score span { font-size: 1.2rem; color: rgba(245,240,224,0.45); }
+    .result-msg { font-size: 1rem; color: rgba(245,240,224,0.55); font-style: italic; margin: 0.8rem 0 2rem; }
+    .result-restart { padding: 0.8rem 2.5rem; background: var(--gold); border: none; color: #1a2e1a; font-family: 'Cinzel', serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 10px; box-shadow: 0 3px 14px rgba(212,168,32,0.4); -webkit-tap-highlight-color: transparent; }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid var(--green-border);
-      display: flex; z-index: 50;
-      padding-bottom: env(safe-area-inset-bottom);
+      background: var(--nav-bg);
+      border-top: 1px solid rgba(212,168,32,0.2);
+      display: flex; z-index: 50; gap: 0.5rem;
+      padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
     }
     .bottom-nav-btn {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 0.7rem 0; border: none; background: transparent;
-      cursor: pointer; gap: 0.2rem;
+      padding: 0.55rem 0.3rem; border: 1px solid rgba(212,168,32,0.18);
+      background: transparent; border-radius: 10px;
+      cursor: pointer; gap: 0.15rem;
       -webkit-tap-highlight-color: transparent;
       transition: all 0.2s;
+      color: rgba(245,240,224,0.55);
     }
-    .bottom-nav-icon { font-size: 1.4rem; direction: rtl; line-height: 1; }
-    .bottom-nav-label { font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
-    .bottom-nav-btn.active .bottom-nav-label { color: var(--green); font-weight: 600; }
+    .bottom-nav-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1a2e1a;
+    }
+    .bottom-nav-icon { font-size: 1.2rem; direction: rtl; line-height: 1; }
+    .bottom-nav-label {
+      font-family: 'Cinzel', serif; font-size: 0.52rem;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .bottom-nav-btn.active .bottom-nav-label { color: #1a2e1a; font-weight: 700; }
 
     /* ── SPEAK BUTTON ── */
     .speak-btn {
       display: flex; align-items: center; justify-content: center; gap: 0.4rem;
       margin: 0.6rem auto 0;
       padding: 0.45rem 1.2rem;
-      background: var(--green-light);
-      border: 1px solid var(--green-border);
+      background: rgba(26,90,26,0.12);
+      border: 1px solid rgba(26,90,26,0.25);
       border-radius: 20px;
-      color: var(--green);
+      color: #2a6a2a;
       font-family: 'Cinzel', serif; font-size: 0.65rem;
       letter-spacing: 0.1em; text-transform: uppercase;
       cursor: pointer; transition: all 0.18s;
       -webkit-tap-highlight-color: transparent;
     }
-    .speak-btn:active { transform: scale(0.95); background: rgba(34,120,34,0.15); }
+    .speak-btn:active { transform: scale(0.95); background: rgba(26,90,26,0.2); }
     .modal-arabic { cursor: pointer; }
     .modal-arabic:active { opacity: 0.75; }
   </style>
@@ -399,13 +392,11 @@
 <div id="splash">
   <div class="splash-icon">أب</div>
   <div class="splash-title">AlifBa</div>
-  <div class="splash-sub">Арабский алфавит</div>
+  <div class="splash-sub">Изучайте арабский алфавит</div>
 </div>
 
 <!-- APP -->
 <div class="app" id="app" style="display:none">
-  <div class="ornament tl">ب</div>
-  <div class="ornament br">ع</div>
   <div class="container">
     <header class="header">
       <div class="header-icon">أب</div>
@@ -419,7 +410,7 @@
 
   <nav class="bottom-nav">
     <button class="bottom-nav-btn active" id="nav-alphabet" onclick="showView('alphabet')">
-      <span class="bottom-nav-icon">أ</span>
+      <span class="bottom-nav-icon">📖</span>
       <span class="bottom-nav-label">Алфавит</span>
     </button>
     <button class="bottom-nav-btn" id="nav-harakaat" onclick="showView('harakaat')">
@@ -427,7 +418,7 @@
       <span class="bottom-nav-label">Харакаты</span>
     </button>
     <button class="bottom-nav-btn" id="nav-quiz" onclick="startQuiz()">
-      <span class="bottom-nav-icon">✦</span>
+      <span class="bottom-nav-icon">✔</span>
       <span class="bottom-nav-label">Тест</span>
     </button>
   </nav>
@@ -514,7 +505,7 @@ function showView(v){
 // ── ALPHABET ──
 function renderAlphabet(){
   document.getElementById('view-alphabet').innerHTML=`
-    <p class="section-label">✦ 28 букв · нажмите на любую ✦</p>
+    <p class="section-label">◆ 28 БУКВ · НАЖМИТЕ НА ЛЮБУЮ ◆</p>
     <div class="alphabet-grid">
       ${alphabet.map(l=>`
         <div class="letter-card" onclick="openModal(${l.id})">
